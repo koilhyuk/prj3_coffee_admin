@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.co.sist.team2.dao.mapper.NoticeMapper">
+
+<select id="selectNotiCount" resultType="int" parameterType="kr.co.sist.team2.vo.SearchVO">
+	select count(n_code) cnt from notice
+	
+	<if test='keyword!=null and !keyword.equals("")'>
+	where ${field} like '%'||#{keyword}||'%'
+	</if>
+</select>
+
+
+<resultMap type="kr.co.sist.team2.domain.NoticeListDomain" id="notiResult">
+	<result column="rnum" property="rnum"/>
+	<result column="n_code" property="nCode"/>
+	<result column="nt_code" property="ntCode"/>
+	<result column="n_subject" property="nSub"/>
+	<result column="n_date" property="nDate"/>
+</resultMap>
+
+<!-- 공지 게시판 -->
+<select id="notiList" resultMap="notiResult" parameterType="kr.co.sist.team2.vo.SearchVO">
+	select rnum, n_code, nt_code, n_subject, to_char(n_date, 'yyyy-mm-dd')
+	from(select rownum rnum, n_code, nt_code, n_subject, n_date
+	from (select  n_code, nt_code, n_subject, n_date from notice
+	
+	<if test='keyword!=null and !keyword.equals("")'>
+	where ${field} like '%'||#{keyword}||'%'
+	</if>
+	
+	order by n_date desc))
+	where rnum between #{startNum} and #{endNum}
+	<!-- 리스트에서 가져올 때 for문으로 역순으로 가져오기 -->
+	<!-- 날짜는 최신순 rnum은 역순 -->
+	
+</select>
+
+
+<!-- 공지 게시판 : 디테일 -->
+<select id="noticeProcessData" resultType="kr.co.sist.team2.domain.NoticeDetailDomain" parameterType="String">
+	select  n_code nCode, nt_code ntCode, n_subject nSubject, n_content nContent
+	from notice
+	where n_code = #{nCode}
+</select>
+
+<!-- 공지 게시판  : 새 글 -->
+<insert id="notiInsert" parameterType="kr.co.sist.team2.vo.NotiWriteVO">
+	<!-- getter 가져오는 방법 : 첫번째 글자는 무조건 소문자 -->
+	insert into NOTICE(N_CODE, ADMIN_ID, N_SUBJECT, N_CONTENT, NT_CODE)
+	values(n_code, 'coffee', #{noticeWriteSub}, #{noticeWriteContent}, (select nt_code from NOTICE_TYPE where nt_type=#{noticeWriteType } ))
+</insert>
+
+<update id="updateNoticeData" parameterType="kr.co.sist.team2.vo.NotiUpdateVO">
+	update notice
+	set N_SUBJECT=#{noticeWriteSub},N_CONTENT=#{noticeWriteContent}, N_DATE=sysdate
+	where n_code=#{noticeCode}
+</update>
+
+<delete id="deleteNoticeData" parameterType="String">
+	delete from notice
+	where n_code=#{noticeCode}
+</delete>
+
+</mapper>

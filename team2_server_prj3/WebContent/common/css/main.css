@@ -1,0 +1,67 @@
+@charset "UTF-8";
+@font-face { font-family: 'Eoe_Zno_EB'; src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_eight@1.0/Eoe_Zno_EB.woff') format('woff'); font-weight: normal; font-style: normal; }
+@font-face { font-family: 'GoyangIlsan'; src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_one@1.0/GoyangIlsan.woff') format('woff'); font-weight: bold; font-style: normal; }
+@font-face { font-family: 'locus_sangsang'; src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_six@1.2/locus_sangsang.woff') format('woff'); font-weight: normal; font-style: normal; }
+
+	/* margin: 0px auto - 창 크기가 줄어들거나 커져도 항상 가운데를 유지함 */
+	#wrap{height: 1100px; margin: 0px auto; background-color: #FFFFFF}/* 디자인이 완료되었을 때 wrap에 깔린 바탕색이 보이면 안됨 */
+	#header{height: 70px; font-family: 'Staatliches', cursive;  color:#F0F0E2;}/* width:800px; - wrap안에 감싸져있어서 width는 안줘도 되는데 헷갈릴 수 있어서 다들 줌 */
+	#sidebar{width:200px; float:left; background-color: #494342; font-family: 'GoyangIlsan', sans-serif; display: flex; }
+	#container{width:1300px; float:left; background-color: #FFFFFF; margin-left: 180px}
+	#mainFooter{ height:110px; background-color:#323C51; }
+	
+	
+	.tFont{ font-family: 'Eoe_Zno_EB', sans-serif; font-weight:nomal; font-size:21px; }
+	
+/*
+ * Sidebar
+ */
+.empty-space{
+	margin-top: 20px;
+	margin-bottom: 10px;
+	margin-left: 10px;
+	margin-right: 10px;
+}
+.nav-link{
+	color: #ffffff;
+}
+.nav-link:hover{
+	color: #A9A19B;
+}
+
+/* 컨테이너 */
+.h2, .h4{
+ font-family: 'Eoe_Zno_EB';
+}
+
+.empty-space{
+ margin-top: 5px;	
+ margin-left: 70px;
+
+}
+.h{
+ font-family:'locus_sangsang' ;
+ padding-left: 27px; 
+ margin-top: 40px;
+}
+.h3 {
+ font-family:'locus_sangsang' ;
+ padding-left: 40px; 
+ margin-top: 10px
+}
+.sellT{
+	border: 3px solid white;
+	font-family:'locus_sangsang' ;
+	background-color: #C5CBCF;
+	color: black;
+}
+.sellC{
+	background-color: #F2F2F2;
+}
+
+.noresize {
+  resize: none; /* 사용자 임의 변경 불가 */
+  resize: both; /* 사용자 변경이 모두 가능 */
+  resize: horizontal; /* 좌우만 가능 */
+  resize: vertical; /* 상하만 가능 */
+}

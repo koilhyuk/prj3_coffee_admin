@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.co.sist.team2.dao.mapper.HomeMapper">
+	
+	<select id="selectHomeQna" resultType="kr.co.sist.team2.domain.HomeQnaDomain">
+		select rnum, qcode, nickName, subject, writeDate
+		from(select  rownum rnum , nickName, subject, writeDate, qcode
+		from(select  m.M_NICK nickName, Q_SUBJECT subject, to_char(Q_WRITE_DATE, 'yyyy-mm-dd') writeDate, q_code qcode
+		from QNA q, member m
+		where (q.m_id=m.m_id) and Q_COMM_FLAG ='N'
+		order by Q_WRITE_DATE desc))
+		where rnum between 1 and 5
+	</select> 
+
+	<select id="selectHomeSell" resultType="int" parameterType="kr.co.sist.team2.vo.HomeSellFlagVO">
+	select count(*)
+	from cart  c, ordering o
+	<where>
+		(c.c_code=o.c_code) and c.c_flag='Y' and o.o_status='C'
+		<choose>
+			<when test='sellFlag.equals("0")'>
+				and to_char(c_date,'yyyymmdd')=to_char(sysdate,'yyyymmdd')
+			</when>
+			<when test='sellFlag.equals("1")'>
+				and  to_char(c_date,'yyyymm')= to_char(sysdate,'yyyymm')
+			</when>
+		</choose>
+	</where>
+	</select>
+	
+	<select id="selectHomeNotice" resultType="kr.co.sist.team2.domain.HomeNoticeDomain" >
+	select  rnum,nCode ,nType ,nSubject ,nDate
+	from(select rownum rnum ,nCode ,nType ,nSubject ,nDate
+	from(select n.n_code nCode, nt.nt_type nType, n.n_subject nSubject, to_char(n.n_date , 'yyyy-mm-dd') nDate
+	from notice n , notice_type nt
+	where n.nt_code=nt.nt_code
+	order by n.n_date desc))
+	where rnum between 1 and 5
+	</select>
+
+
+<select id="selectHomeQnaDetail" resultType="kr.co.sist.team2.domain.HomeQnaDetailDomain" parameterType="String">
+	select   m.m_nick nickName , q.q_code qCode, q.q_subject qSubject, q.q_content qContent ,  to_char(q.q_write_date,'yyyy-mm-dd hh24:mi') qWriteDate
+	from qna q , member m
+	where (q.m_id=m.m_id) and q.q_code=#{qCode}
+</select>
+
+<insert id="insertHomeQnaComm" parameterType="kr.co.sist.team2.vo.HomeQnaCommVO">
+	update qna set Q_ANSWER =#{qnaComm} , Q_COMM_DATE=sysdate, Q_COMM_FLAG='Y' 
+	where Q_CODE=#{qCode}
+</insert>
+
+<select id="selectHomeNotiModify" resultType="kr.co.sist.team2.domain.HomeNoticeDetailDomain" parameterType="String">
+	select  nt.nt_type ntType, n_code nCode, n_subject nSubject, n_date nDate, n_content nContent
+	from notice n , notice_type nt
+	where (nt.nt_code=n.nt_code) and n_code= #{nCode}
+
+</select>
+
+<update id="updateHomeNotice" parameterType="kr.co.sist.team2.vo.HomeNoticeModifyVO">
+	update notice
+	set n_subject=#{noticeHomeSubject}, n_content=#{noticeHomeContent}, n_date=sysdate, nt_code=(select nt_code from notice_type where nt_type=#{noticeDataType})
+	where n_code = #{noticeCode}
+</update>
+	
+	
+	
+<insert id="insertNewNotice" parameterType="kr.co.sist.team2.vo.HomeNoticeNewInsertVO"  >
+insert into notice(N_CODE, ADMIN_ID, N_SUBJECT, N_DATE, N_CONTENT, NT_CODE)
+values(n_code, 'coffee', #{noticeHomeSubject}, sysdate, #{noticeHomeContent}, (select nt_code from notice_type where nt_type=#{noticeDataType}))
+</insert>	
+
+
+<select id="selectHomeOrderCnt" resultType="int" parameterType="String">
+	
+	select count(*) cnt
+	from   ORDERING
+	
+	<where>
+		<choose>
+			<when test='sellFlag.equals("0")'>
+				 O_STATUS ='P'
+			</when>
+			<when test='sellFlag.equals("1")'>
+				 O_STATUS ='C'
+			</when>
+		</choose>
+	</where>
+	
+
+</select>
+
+
+
+
+
+
+</mapper>

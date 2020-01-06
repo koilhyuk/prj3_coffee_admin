@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.co.sist.team2.dao.mapper.admin_login_mapper">
+<select id="selectAdminLogin"  resultType="ald" parameterType="kr.co.sist.team2.vo.AdminLoginVO">
+	select admin_id, admin_pass
+	from admin
+	where admin_id=#{adminId} and admin_pass=#{adminPass} 
+</select>
+<!-- <update id="updateDate" parameterType="String">
+	update ADMIN
+	set ADMIN_DATE = sysdate
+	where ADMIN_ID=#{adminId}
+</update> -->
+</mapper>

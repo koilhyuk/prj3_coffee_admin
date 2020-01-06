@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.co.sist.team2.dao.mapper.MemberMapper">
+
+<select id="selectTotalCount" resultType="int" parameterType="kr.co.sist.team2.vo.SearchVO">
+	select count(m_id) cnt from member
+	
+	<if test='keyword!=null and !keyword.equals("")'>
+	where ${field} like '%'||#{keyword}||'%'
+	</if>
+</select>
+
+<!-- 회원게시판의 모든 리스트를 조회 -->
+<resultMap type="kr.co.sist.team2.domain.MemberListDomain" id="memResult">
+	<result column="rnum" property="rnum"/>
+	<result column="m_name" property="mName"/>
+	<result column="m_id" property="mId"/>
+	<result column="m_nick" property="mNick"/>
+	<result column="m_email" property="mEmail"/>
+	<result column="m_phone" property="mPhone"/>
+	<result column="m_recent_date" property="mReConn"/>
+	<result column="m_date" property="mMemberShipDate"/>
+</resultMap>
+
+
+<!-- 회원 게시판 -->
+<select id="memberAllList" resultMap="memResult" parameterType="kr.co.sist.team2.vo.SearchVO">
+	select rnum, m_name, m_id, m_nick, m_email, m_phone,  to_char(m_recent_date, 'yyyy-mm-dd am hh24:mi') m_recent_date, to_char(m_date, 'yyyy-mm-dd') m_date from 
+		(select rownum rnum, m_name, m_id, m_nick, m_email, m_phone, m_recent_date, m_date from
+		(select m_name, m_id, m_nick, m_email, m_phone, m_recent_date, m_date
+    from member where m_del = 'N'
+
+	<if test='keyword!=null and !keyword.equals("")'>
+	and ${field} like '%'||#{keyword}||'%'
+	</if>
+	
+	order by m_date desc))
+	where rnum between #{startNum} and #{endNum} 
+	
+</select>
+
+
+
+<resultMap type="kr.co.sist.team2.domain.MemberDetailDomain" id="memDResult">
+	<result column="m_name" property="mName"/>
+	<result column="m_gender" property="mGender"/>
+	<result column="m_nick" property="mNick"/>
+	<result column="m_id" property="mId"/>
+	<result column="m_email" property="mEmail"/>
+	<result column="m_phone" property="mPhone"/>
+	<result column="m_birth" property="mBirth"/>
+	<result column="m_date" property="mDate"/>
+	<result column="m_recent_ip" property="mIp"/>
+</resultMap>
+<!-- 회원 게시판 프로세스 : 회원 정보, 활동 정보 -->
+<select id="memberInfo" resultMap="memDResult" parameterType="String">
+	select m_name, m_gender, m_nick, m_id, m_email, m_phone, m_birth, m_date, m_recent_ip
+	from member
+	where m_id like #{m_id}
+</select>
+
+
+<!-- 회원 게시판 프로세스 : 주문내역  -->
+<select id="memberOrder" resultType="kr.co.sist.team2.domain.MemberOrderListDomain" parameterType="String">
+   select gd_name gdName, c_quantity cQuantity, to_char(c_date, 'yyyy-mm-dd') orderDate
+   from cart c , ordering o
+   where (c.c_code=o.c_code) and  c.m_id=#{m_id}
+</select>
+
+<!-- 회원 게시판 프로세스 : 포인트  -->
+<select id="memberPoint" resultType="kr.co.sist.team2.vo.PointListiVO" parameterType="String">
+	select to_char(l_use_date, 'yyyy-mm-dd') useDate, to_char(l_insert_date, 'yyyy-mm-dd') insDate, l_status lemonStatus
+	from lemon
+	where m_id = #{m_id}
+</select>
+
+<select id="memberPointCount" resultType="int" parameterType="String">
+	select count(case when l_status = 'N' then 0 end)
+	from lemon
+	where m_id = #{m_id}
+</select>
+
+<update id="deleteMember" parameterType="String">
+	update member
+	set m_del='Y'
+	where m_id = #{mId}
+</update>
+
+</mapper>
+
+
+
+
+
+
+
+
+
+

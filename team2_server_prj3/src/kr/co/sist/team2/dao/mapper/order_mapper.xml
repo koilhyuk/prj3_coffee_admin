@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.co.sist.team2.dao.mapper.OrderMapper">
+
+<!-- 기간 값 있으면 and  to_char(c_date,'yyyy-mm-dd') between '2019-11-09' and '2019-12-09' 넣기 -->
+ <select id="selectOrderTab" resultType="kr.co.sist.team2.domain.OrderCalculateTabDomain" parameterType="kr.co.sist.team2.vo.OrderSearchCommVO">
+		select rownum rnum, oCode, cDate,  gdName,  cTotalPrice,  cQuantity
+		from(select  o.o_code oCode, to_char(c_date,'yyyy-mm-dd') cDate, gd_name gdName,  C_TOTAL_PRICE cTotalPrice, C_QUANTITY cQuantity
+		from   ORDERING o, CART c
+		where (o.c_code=c.c_code) and o_status='C'   
+			<if test='!frontPeriodSelect.equals("1111-11-11") and !backPeriodSelect.equals("1111-11-11")'>
+			and  to_char(c_date,'yyyy-mm-dd') between #{frontPeriodSelect} and #{backPeriodSelect}
+			</if>
+		order by c_date desc)
+</select> 
+
+
+<!-- 기간 입력이 없을 땐 전체만 / 있을 땐 두 번 조회 -->
+ <select id="selectCalculate" resultType="int" parameterType="kr.co.sist.team2.vo.OrderSearchCommVO">
+	select sum(C_TOTAL_PRICE) cTotalPrice
+	from   ORDERING o, CART c
+	where (o.c_code=c.c_code) and  o_status='C'  
+		<if test='searchFlag.equals("Peri")'>
+		and   to_char(c_date,'yyyy-mm-dd') between  #{frontPeriodSelect} and #{backPeriodSelect}
+		</if>
+</select> 
+
+
+
+<select id="selectAllOrder" resultType="kr.co.sist.team2.domain.OrderAllListDomain" parameterType="kr.co.sist.team2.vo.OrderSearchCommVO">
+	select rownum rnum, gdName, cQuantity,oStatus, cTotalPrice, mId, mPhone,  cDate, oCode
+	from(select gd_name gdName, C_QUANTITY cQuantity,O_STATUS oStatus, o_code oCode, C_TOTAL_PRICE cTotalPrice, m.M_ID mId, M_PHONE mPhone, to_char(C_DATE,'yyyy-mm-dd') cDate
+	from MEMBER m, ORDERING o, CART c
+	where  (c.m_id=m.m_id and o.c_code=c.c_code)  and m.m_id like '%'||#{searchInput}||'%' 
+	<if test='!selectStatus.equals("A")'>
+	and o_status=#{selectStatus}
+	</if>
+	order by o_status desc, c_date desc)
+</select>
+
+
+<update id="orderStatusUpdate" parameterType="String">
+	update ORDERING
+	set  O_STATUS='C' , c_date=sysdate
+	where O_CODE=#{oCode}
+</update>
+
+
+</mapper>

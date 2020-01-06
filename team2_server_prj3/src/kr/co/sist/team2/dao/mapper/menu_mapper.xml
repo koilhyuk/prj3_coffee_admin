@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.co.sist.team2.dao.mapper.MenuMapper">
+
+
+
+	<select id="selectMenuCate" resultType="kr.co.sist.team2.domain.MenuCateDomain" >
+	select gc_code gcCode, gc_name gcName from GOODS_CATEGORY
+	</select>
+	
+	<select id="selectAllLoading" resultType="kr.co.sist.team2.domain.MenuAllDomain">
+	select gd_name gdName, gc.gc_name gcCate,   gd.gd_price   gdPrice
+	from GOODS_DETAIL gd, GOODS_CATEGORY gc
+	where (gc.gc_code = gd.gc_code) and gd_del = 'N'
+	</select>
+	
+<select id="selectTotalCount" resultType="int" parameterType="kr.co.sist.team2.vo.MenuSearchVO">
+	select count(*) cnt 
+	from GOODS_DETAIL gd,   GOODS_CATEGORY gc		
+	
+	<where>
+		(gc.gc_code = gd.gc_code) 
+		and gd_name like '%'||#{menuSearch}||'%' and gd_del='N'
+		<if test='!cateSelect.equals("전체")'>
+			and gc_name=#{cateSelect}
+		</if>
+	</where>	
+	
+	
+</select>
+	
+<select id="selectAllMenu" resultType="kr.co.sist.team2.domain.MenuAllDomain" parameterType="kr.co.sist.team2.vo.MenuSearchVO">
+	select  gdName,    gcCate,       gdPrice
+	from(select rownum rnum,    gdName,    gcCate,       gdPrice
+	from(select gd_name gdName, gc.gc_name gcCate,   gd.gd_price   gdPrice
+	from GOODS_DETAIL gd,   GOODS_CATEGORY gc
+	
+	where	(gc.gc_code = gd.gc_code) 
+		and gd_name like '%'||#{menuSearch}||'%' and gd_del='N' 
+		<if test='!cateSelect.equals("전체")'>
+			and gc_name=#{cateSelect}
+		</if>
+		order by gd_price  desc))where  rnum between #{startNum} and #{endNum} 
+
+	</select>
+
+
+<select id="selectAllCateType" resultType="kr.co.sist.team2.domain.MenuCateSearchDomain">
+	select gc_code gcCode, gc_name gcName
+	from GOODS_CATEGORY gc, MENU m
+	where (gc.m_code=m.m_code) and gc.m_code=(select m_code from menu where m_name ='음료')
+
+</select>
+
+<insert id="insertNewCate" parameterType="String">
+	insert into GOODS_CATEGORY(GC_CODE, GC_NAME, M_CODE)    
+	values(GC_CODE,#{CateName},(select m_code from menu where m_name ='음료'))
+
+</insert>
+
+
+<select id="selectModalCate" resultType="kr.co.sist.team2.domain.MenuCateSearchDomain" parameterType="String">
+	select gc_code gcCode, gc_name gcName
+	from GOODS_CATEGORY gc, MENU m
+	where (gc.m_code=m.m_code) and gc.m_code=(select m_code from menu where m_name =#{selectMenu})
+
+</select>
+
+
+<insert id="insertNewMenu" parameterType="kr.co.sist.team2.vo.MenuNewAddVO">
+	insert into GOODS_DETAIL(GD_NAME, GD_KAL, GD_CAFFEIN, GD_SUGAR, GD_SALT, GD_INFO, GD_IMG, GD_PRICE, GC_CODE)
+	values(#{gdName}, #{gdKcal}, #{gdCaffein}, #{gdSugar}, #{gdSalt}, #{gdInfo}, #{newMenuImgselect}, #{gdPrice}, (select gc_code from GOODS_CATEGORY where gc_name=#{modalSelectCate}))
+</insert> 
+
+<insert id="insertNewRecipe" parameterType="kr.co.sist.team2.vo.MenuNewRecipeVO">
+	insert into B_RECIPE(GD_NAME, BR_SHOT, BR_MILK, BR_SYRUP, BR_CREAM, BR_TOPPING, BR_TYPE)
+	values(#{insertRecipeGdName},#{recipeShot},#{recipeMilk},#{recipeSyrup},#{recipeCream},#{recipeTopping},#{recipeType})
+</insert>
+
+
+<select id="selectOriginMenuInform" resultType="kr.co.sist.team2.domain.MenuOriginInformDomain" parameterType="String">
+	select m.m_name mName, GD_IMG gdImg, gc_name gcName,  GD_PRICE    gdPrice, GD_KAL  gdKal, GD_CAFFEIN gdCaffein, GD_SUGAR  gdSugar,  GD_SALT gdSalt, GD_INFO gdInfo
+	from menu m , goods_detail gd, GOODS_CATEGORY gc
+	where (m.m_code= gc.m_code and gc.gc_code=gd.gc_code) and  gd_name=#{gdName} and gd_del='N'
+
+</select>
+
+<select id="selectOriginMenuRecipe" resultType="kr.co.sist.team2.domain.MenuOriginRecipeDomain" parameterType="String">
+	select  BR_SHOT brShot, BR_MILK brMilk, BR_SYRUP brSyrup, BR_CREAM brCream, BR_TOPPING brTopping, BR_TYPE brType
+	from B_RECIPE                    
+	where GD_NAME=#{gdName}
+
+</select>
+
+
+<update id="deleteGoods" parameterType="String">
+	update  GOODS_DETAIL
+	set    GD_DEL='Y'
+	where GD_NAME=#{gdName}
+</update>
+
+
+<update id="updateOriginGoods" parameterType="kr.co.sist.team2.vo.MenuOriginModifyVO">
+	update GOODS_DETAIL
+	set  GD_KAL=#{originGdKcal}, GD_CAFFEIN=#{originGdCaffein}, GD_SUGAR=#{originGdSugar}, GD_SALT=#{originGdSalt}, GD_INFO=#{originGdInfo}, GD_IMG=#{originMenuImg}, GD_PRICE=#{originGdPrice}, GC_CODE=(select gc_code from GOODS_CATEGORY where gc_name=#{originMenuCate})
+	where  GD_NAME=#{originGdName}
+</update>
+
+<select id="selectDuplication" resultType="int"  parameterType="kr.co.sist.team2.vo.MenuOriginModifyVO">
+	select count(*) cnt 
+	from b_recipe
+	where gd_name=#{originGdName}
+</select>
+
+
+
+<update id="updateOriginRecipe" parameterType="kr.co.sist.team2.vo.MenuOriginModifyVO">
+	update B_RECIPE
+	set  BR_SHOT=#{originShot}, BR_CREAM=#{originCream}, BR_MILK=#{originMilk}, BR_SYRUP=#{originSyrup}, BR_TOPPING=#{originTopping}, BR_TYPE=#{originType}
+	where  GD_NAME=#{originGdName}
+</update>
+
+<insert id="insertNewModifyRecipe" parameterType="kr.co.sist.team2.vo.MenuOriginModifyVO">
+	insert into b_recipe(GD_NAME, BR_SHOT, BR_MILK, BR_SYRUP, BR_CREAM, BR_TOPPING, BR_TYPE)
+	values(#{originGdName}, #{originShot}, #{originMilk}, #{originSyrup}, #{originCream}, #{originTopping}, #{originType})
+
+</insert>
+
+
+
+</mapper>

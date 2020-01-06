@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.co.sist.team2.dao.mapper.qnaMapper">
+
+
+<select id="selectTotalCount" resultType="int" parameterType="kr.co.sist.team2.vo.SearchQnaVO">
+	select count(*) cnt from qna
+
+<if test='keyword!=null and !keyword.equals("")'>
+where ${field}=#{keyword}
+
+</if>
+</select>
+
+<select id="qnaBoardList" resultType="kr.co.sist.team2.domain.QnaBoardDomain" >
+select rnum, q_code, m_id, q_subject, q_comm_flag, to_char(q_comm_date,'yyyy-mm-dd hh24:mi') q_comm_date, to_char(q_write_date,'yyyy-mm-dd hh24:mi') q_write_date
+from(select rownum rnum,q_code, m_id, q_subject, q_comm_flag, q_comm_date, q_write_date
+from(select q. q_code , m.m_id, q.q_subject, q.q_comm_flag, q.q_comm_date, q.q_write_date
+from qna q, member m
+where q.m_id=m.m_id
+<if test='keyword != null and !keyword.equals("")'>
+<if test='field.equals("q_code")'>
+	and q.q_code like '%'||#{keyword}||'%'
+</if>
+<if test='field.equals("m_id")'>
+	and q.m_id like '%'||#{keyword}||'%'
+</if>
+</if>	
+	order by q_comm_flag, q.q_write_date desc ))
+where rnum between #{startNum} and #{endNum}
+	
+</select>
+<select id="selectQnaAdmin" resultType="kr.co.sist.team2.domain.QnaDetailDomain" parameterType="String">
+select m_id, q_subject, q_content, q_answer, q_write_date
+from qna
+where  q_code=#{id}
+</select>
+
+<update id="updateAnswer" parameterType="kr.co.sist.team2.vo.QnaDetailVO">
+update qna
+set q_answer=#{q_answer},q_comm_flag='Y', q_comm_date=sysdate
+where q_code=#{q_code}
+</update>
+
+<delete id="deleteQnaAdmin" parameterType="String">
+delete
+from qna
+where q_code=#{code}
+</delete>
+
+</mapper>

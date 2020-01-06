@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration
+  PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+	<properties resource="properties/database.properties"/>
+	<typeAliases>
+	<!-- 예시	<typeAlias type="kr.co.sist.domain.EmpDetailDomain" alias="edd"/> -->
+	<typeAlias type="kr.co.sist.team2.domain.AdminLoginDomain" alias="ald"/>
+	</typeAliases>
+  <environments default="development">
+    <environment id="development">
+      <transactionManager type="JDBC"/>
+      <dataSource type="POOLED">
+        <property name="driver" value="${driver}"/>
+        <property name="url" value="${url}"/>
+        <property name="username" value="coffee"/>
+        <property name="password" value="caffe"/>
+      </dataSource>
+    </environment>
+  </environments>
+  <mappers>
+<!-- 예시    <mapper resource="kr/co/sist/dao/mapper/dept_mapper.xml"/> -->
+	<mapper resource="kr/co/sist/team2/dao/mapper/home_mapper.xml"/>
+	<mapper resource="kr/co/sist/team2/dao/mapper/menu_mapper.xml"/>
+	<mapper resource="kr/co/sist/team2/dao/mapper/order_mapper.xml"/>
+	<mapper resource="kr/co/sist/team2/dao/mapper/member_mapper.xml"/>
+	<mapper resource="kr/co/sist/team2/dao/mapper/notice_mapper.xml"/>
+	<mapper resource="kr/co/sist/team2/dao/mapper/admin_login_mapper.xml"/>
+	<mapper resource="kr/co/sist/team2/dao/mapper/qna_mapper.xml"/>
+  </mappers>
+</configuration>
